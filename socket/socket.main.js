@@ -23,9 +23,24 @@ module.exports = function(io){
 
 			clients.push(currentUser);
 			socket.emit("CONNECTED", currentUser );
-			socket.broadcast.emit('USER_CONNECTED',currentUser);
+			// socket.broadcast.emit("USER_CONNECTED",currentUser);
+			// socket.emit("USER_CONNECTED",currentUser);
 			listOfUsers();
 
+		});
+
+		socket.on("USER_CONNECTED_LOBBY", function(){
+			// console.log("server: USER_CONNECTED_LOBBY");
+			socket.emit("USER_CONNECTED_LOBBY", currentUser );
+		});
+
+		socket.on("GET_CONNECTED_LOBBY_USER", function(){
+			// console.log("GET_CONNECTED_LOBBY_USER");
+			var onlineUser = {
+				totalClients:clients.length,
+				clients:clients
+			}
+			socket.emit("GET_CONNECTED_LOBBY_USER", onlineUser );
 		});
 
 	// 	socket.on("PLAY_REQUEST", function (){
@@ -79,16 +94,16 @@ module.exports = function(io){
 	// 	});
 
 		socket.on("disconnect", function (){
-			// socket.broadcast.emit('USER_DISCONNECTED',currentUser);
-			// for (var i = 0; i < clients.length; i++) {
-			// 	if (clients[i].name === currentUser.name && clients[i].id === currentUser.id) {
+			socket.broadcast.emit('USER_DISCONNECTED',currentUser);
+			for (var i = 0; i < clients.length; i++) {
+				if (clients[i].name === currentUser.name && clients[i].id === currentUser.id) {
 
-			// 		console.log("User "+clients[i].name+" id: "+clients[i].id+" has disconnected");
-			// 		clients.splice(i,1);
-			// 		playerReadyCount--;
+					console.log("User "+clients[i].name+" id: "+clients[i].id+" has disconnected");
+					clients.splice(i,1);
+					playerReadyCount--;
 
-			// 	};
-			// };
+				};
+			};
 		});
 
 	});
