@@ -1,7 +1,7 @@
 var shortId 	=	require('shortid');
 
 module.exports = function(io){	
-	var clients = [];
+	var clients = []; // who is in lobby scene
 	// var playerReadyCount = 0;
 	io.on('connection', function (socket){
 		console.log("socket.io avariable");
@@ -21,7 +21,6 @@ module.exports = function(io){
 				position:"0,0,0"
 			}
 
-			clients.push(currentUser);
 			socket.emit("CONNECTED", currentUser );
 			// socket.broadcast.emit("USER_CONNECTED",currentUser);
 			// socket.emit("USER_CONNECTED",currentUser);
@@ -31,7 +30,8 @@ module.exports = function(io){
 
 		socket.on("USER_CONNECTED_LOBBY", function(){
 			// console.log("server: USER_CONNECTED_LOBBY");
-			socket.emit("USER_CONNECTED_LOBBY", currentUser );
+			clients.push(currentUser);
+			socket.broadcast.emit("USER_CONNECTED_LOBBY", currentUser );
 		});
 
 		socket.on("GET_CONNECTED_LOBBY_USER", function(){
