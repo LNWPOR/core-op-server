@@ -44,23 +44,31 @@ module.exports = function(io){
 		socket.on("USER_CONNECTED_ROOM", function(data){
 			
 			var EnterRoomStatus;
+			var EnterRoomStatusForOther;
 			if (rooms[data.roomNumber].players.length < maxRoomPlayer) {
 				rooms[data.roomNumber].players.push(currentUser);
 				// console.log(rooms[data.roomNumber].players[1]);
 				EnterRoomStatus = {
 					canEnterRoom:true,
-					enterRoomText:"welcome",
-					playerNumber:rooms[data.roomNumber].players.length
-				}
+					roomSelected:rooms[data.roomNumber]
+				};
+
+				EnterRoomStatusForOther = {
+					userEntered:currentUser,
+					roomNumberEntered:data.roomNumber
+				};
+				socket.broadcast.emit("OTHER_USER_CONNECTED_ROOM", EnterRoomStatusForOther );
 			}
 			else{
 				EnterRoomStatus = {
 					canEnterRoom:false,
-					enterRoomText:"This room was full now.Please try again later.",
-					playerNumber:0
+					playerNumber:-1
 				}
 			}
 			socket.emit("USER_CONNECTED_ROOM",EnterRoomStatus);
+
+			
+			
 		});
 
 		socket.on("GET_CONNECTED_LOBBY_USER", function(){
