@@ -2,6 +2,16 @@ var shortId 	=	require('shortid');
 
 module.exports = function(io){	
 	var clients = []; // who is in lobby scene
+	
+	var roomTotal = 3;
+	var maxRoomPlayer  = 2;
+	var rooms = [];
+	for (var i = 0; i < roomTotal; i++) {
+		rooms[i] = {
+			players:[]
+		}
+	}
+
 	// var playerReadyCount = 0;
 	io.on('connection', function (socket){
 		console.log("socket.io avariable");
@@ -17,13 +27,10 @@ module.exports = function(io){
 			console.log(data);
 			currentUser = {
 				id:shortId.generate(),
-				name:data.name,
-				position:"0,0,0"
+				name:data.name
+				// position:"0,0,0"
 			}
-
 			socket.emit("CONNECTED", currentUser );
-			// socket.broadcast.emit("USER_CONNECTED",currentUser);
-			// socket.emit("USER_CONNECTED",currentUser);
 			listOfUsers();
 
 		});
@@ -34,6 +41,28 @@ module.exports = function(io){
 			socket.broadcast.emit("USER_CONNECTED_LOBBY", currentUser );
 		});
 
+		socket.on("USER_CONNECTED_ROOM", function(data){
+			
+			var EnterRoomStatus;
+			if (rooms[data.roomNumber].players.length < maxRoomPlayer) {
+				rooms[data.roomNumber].players.push(currentUser);
+				// console.log(rooms[data.roomNumber].players[1]);
+				EnterRoomStatus = {
+					canEnterRoom:true,
+					enterRoomText:"welcome",
+					playerNumber:rooms[data.roomNumber].players.length
+				}
+			}
+			else{
+				EnterRoomStatus = {
+					canEnterRoom:false,
+					enterRoomText:"This room was full now.Please try again later.",
+					playerNumber:0
+				}
+			}
+			socket.emit("USER_CONNECTED_ROOM",EnterRoomStatus);
+		});
+
 		socket.on("GET_CONNECTED_LOBBY_USER", function(){
 			// console.log("GET_CONNECTED_LOBBY_USER");
 			var onlineUser = {
@@ -41,6 +70,16 @@ module.exports = function(io){
 				clients:clients
 			}
 			socket.emit("GET_CONNECTED_LOBBY_USER", onlineUser );
+		});
+
+		socket.on("GET_CONNECTED_ROOM_USER", function(){
+			// console.log("GET_CONNECTED_LOBBY_USER");
+			var currentRoomsStatus = {
+				totalRooms:rooms.length,
+				rooms:rooms,
+				maxRoomPlayer:maxRoomPlayer
+			}
+			socket.emit("GET_CONNECTED_ROOM_USER", currentRoomsStatus );
 		});
 
 	// 	socket.on("PLAY_REQUEST", function (){
@@ -100,7 +139,7 @@ module.exports = function(io){
 
 					console.log("User "+clients[i].name+" id: "+clients[i].id+" has disconnected");
 					clients.splice(i,1);
-					playerReadyCount--;
+					// playerReadyCount--;
 
 				};
 			};
