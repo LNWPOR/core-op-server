@@ -5,6 +5,7 @@ module.exports = function(io){
 	
 	var roomTotal = 3;
 	var maxRoomPlayer  = 2;
+
 	var rooms = [];
 	for (var i = 0; i < roomTotal; i++) {
 		rooms[i] = {
@@ -42,20 +43,22 @@ module.exports = function(io){
 		});
 
 		socket.on("USER_CONNECTED_ROOM", function(data){
-			
 			var EnterRoomStatus;
 			var EnterRoomStatusForOther;
-			if (rooms[data.roomNumber].players.length < maxRoomPlayer) {
-				rooms[data.roomNumber].players.push(currentUser);
-				// console.log(rooms[data.roomNumber].players[1]);
+			var roomNumber = parseInt(data.roomNumber);
+
+			if (rooms[roomNumber].players.length < maxRoomPlayer) {
+				rooms[roomNumber].players.push(currentUser);
+				// console.log(rooms[roomNumber].players[1]);
 				EnterRoomStatus = {
 					canEnterRoom:true,
-					roomSelected:rooms[data.roomNumber]
+					roomSelected:rooms[roomNumber]
 				};
 
 				EnterRoomStatusForOther = {
-					userEntered:currentUser,
-					roomNumberEntered:data.roomNumber
+					userNumberEntered:rooms[roomNumber].players.length-1,
+					userNameEntered:currentUser.name,
+					roomNumberEntered:roomNumber
 				};
 				socket.broadcast.emit("OTHER_USER_CONNECTED_ROOM", EnterRoomStatusForOther );
 			}
@@ -160,5 +163,11 @@ module.exports = function(io){
 			console.log("Now "+clients[i].name+" ONLINE");
 		}
 		console.log('----------------------------------------');
+	}
+
+	getType = function(val){
+	    if (typeof val === 'undefined') return 'undefined';
+	    if (typeof val === 'object' && !val) return 'null';
+	    return ({}).toString.call(val).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
 	}
 }
