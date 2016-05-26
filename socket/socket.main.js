@@ -27,52 +27,66 @@ module.exports = function(io){
 
 
 		socket.on("SIGNUP", function (data){
-		 	
 			User.findOne ({username: data.username}, function(err, user) {
 				if(user){
 					console.log(data.username + " already exist");
+					var signUpResult = {
+						status:0
+					}
+					socket.emit("SIGNUP_READY", signUpResult );
 				}else if(!user){
 					var hash = bcrypt.hashSync(data.password);
-					var user = new User({ username:data.username ,password: hash });
+					var user = new User({ username:data.username ,password: hash ,highScore:0});
 					user.save(function(err) {
 					    if(err) {
 					     	console.log(err);
+					     	var signUpResult = {
+								status:0
+							}
+							socket.emit("SIGNUP_READY", signUpResult );
 					    } else {
 					      	console.log('user: ' + user.username + " saved.");
+					      	var signUpResult = {
+								status:1
+							}
+							socket.emit("SIGNUP_READY", signUpResult );
 					    }
 					});
 				}else{
 					console.log(err);
+					var signUpResult = {
+						status:0
+					}
+					socket.emit("SIGNUP_READY", signUpResult );
 				}
+				
 			});
+
+			
 		    
 		});
 
 		socket.on("LOGIN", function (data){
 
-			// User.findOne ({username: data.username}, function(err, user) {
-			// 	if(user){
-			// 		if(bcrypt.compareSync(data.password, user.password)){
-			// 			console.log(user.username + "login success");
-			// 		}
-			// 	}else{
-			// 		console.log(err);
-			// 	}
-			    
-		 //  	})
-
-
-			console.log(data);
-			currentUser = {
-				id:shortId.generate(),
-				name:data.name,
-				playerNumber:null,
-				roomNumber:null,
-				position:"0,0,0"
-			}
-			socket.emit("CONNECTED", currentUser );
-			listOfUsers();
-
+			User.findOne ({username: data.username}, function(err, user) {
+				if(user){
+					if(bcrypt.compareSync(data.password, user.password)){
+						console.log(user.username + " login success");
+						currentUser = {
+							id:user._id,
+							name:user.username,
+							highScore:user.highScore,
+							playerNumber:null,
+							roomNumber:null,
+							position:"0,0,0"
+						}
+						socket.emit("CONNECTED", currentUser );
+						listOfUsers();
+					}
+				}else{
+					console.log(err);
+				}  
+		  	})
 		});
 
 		socket.on("USER_CONNECTED_LOBBY", function(){
