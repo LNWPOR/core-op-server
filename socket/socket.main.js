@@ -28,7 +28,9 @@ module.exports = function(io){
 			console.log(data);
 			currentUser = {
 				id:shortId.generate(),
-				name:data.name
+				name:data.name,
+				playerNumber:null,
+				roomNumber:null
 				// position:"0,0,0"
 			}
 			socket.emit("CONNECTED", currentUser );
@@ -43,13 +45,20 @@ module.exports = function(io){
 		});
 
 		socket.on("USER_CONNECTED_ROOM", function(data){
+
+
+
 			var EnterRoomStatus;
 			var EnterRoomStatusForOther;
 			var roomNumber = parseInt(data.roomNumber);
 
 			if (rooms[roomNumber].players.length < maxRoomPlayer) {
 				rooms[roomNumber].players.push(currentUser);
-				// console.log(rooms[roomNumber].players[1]);
+				currentUser.playerNumber = rooms[roomNumber].players.length-1;
+				currentUser.roomNumber = roomNumber;
+
+				console.log("User " + currentUser.name + " is playerNumber " + currentUser.playerNumber + " in roomNumber " + currentUser.roomNumber);
+				
 				EnterRoomStatus = {
 					canEnterRoom:true,
 					roomSelected:rooms[roomNumber]
@@ -64,8 +73,7 @@ module.exports = function(io){
 			}
 			else{
 				EnterRoomStatus = {
-					canEnterRoom:false,
-					playerNumber:-1
+					canEnterRoom:false
 				}
 			}
 			socket.emit("USER_CONNECTED_ROOM",EnterRoomStatus);
@@ -144,6 +152,11 @@ module.exports = function(io){
 	// 	});
 
 		socket.on("disconnect", function (){
+			removeUserLobby();
+			removePlayerRoom();
+		});
+
+		removeUserLobby = function(){
 			socket.broadcast.emit('USER_DISCONNECTED',currentUser);
 			for (var i = 0; i < clients.length; i++) {
 				if (clients[i].name === currentUser.name && clients[i].id === currentUser.id) {
@@ -154,9 +167,19 @@ module.exports = function(io){
 
 				};
 			};
-		});
+		}
+
+		removePlayerRoom = function(){
+			socket.broadcast.emit('USER_DISCONNECTED_ROOM',currentUser);
+
+			console.log("User " + currentUser.name + " as PlayerNumber " + currentUser.playerNumber + " is logout from roomNumber " + currentUser.roomNumber);
+			rooms[currentUser.roomNumber].players.splice(currentUser.playerNumber,1);
+		}
 
 	});
+
+	
+
 
 	listOfUsers = function (){
 		for( var i = 0; i < clients.length; i++ ){
