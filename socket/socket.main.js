@@ -71,10 +71,7 @@ module.exports = function(io){
 				};
 				socket.broadcast.emit("OTHER_USER_CONNECTED_ROOM", EnterRoomStatusForOther );
 
-				if(rooms[roomNumber].players.length == maxRoomPlayer){
-					socket.emit("ROOM_READY");
-					socket.broadcast.emit("ROOM_READY");
-				}
+				
 			}
 			else{
 				EnterRoomStatus = {
@@ -104,6 +101,11 @@ module.exports = function(io){
 				maxRoomPlayer:maxRoomPlayer
 			}
 			socket.emit("GET_CONNECTED_ROOM_USER", currentRoomsStatus );
+		});
+
+		socket.on("ROOM_READY", function(){
+			socket.emit("ROOM_READY");
+			socket.broadcast.emit("ROOM_READY");
 		});
 
 	// 	socket.on("PLAY_REQUEST", function (){
