@@ -30,8 +30,8 @@ module.exports = function(io){
 				id:shortId.generate(),
 				name:data.name,
 				playerNumber:null,
-				roomNumber:null
-				// position:"0,0,0"
+				roomNumber:null,
+				position:"0,0,0"
 			}
 			socket.emit("CONNECTED", currentUser );
 			listOfUsers();
@@ -106,6 +106,12 @@ module.exports = function(io){
 		socket.on("ROOM_READY", function(){
 			socket.emit("ROOM_READY");
 			socket.broadcast.emit("ROOM_READY");
+		});
+
+		socket.on("UPDATE_OTHER_PLAYER", function(data){
+			// socket.emit("UPDATE_OTHER_PLAYER");
+			currentUser.position = data.position;
+			socket.broadcast.emit("UPDATE_OTHER_PLAYER",currentUser);
 		});
 
 	// 	socket.on("PLAY_REQUEST", function (){
