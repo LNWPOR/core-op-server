@@ -70,6 +70,11 @@ module.exports = function(io){
 					roomNumberEntered:roomNumber
 				};
 				socket.broadcast.emit("OTHER_USER_CONNECTED_ROOM", EnterRoomStatusForOther );
+
+				if(rooms[roomNumber].players.length == maxRoomPlayer){
+					socket.emit("ROOM_READY");
+					socket.broadcast.emit("ROOM_READY");
+				}
 			}
 			else{
 				EnterRoomStatus = {
