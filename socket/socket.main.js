@@ -1,4 +1,6 @@
-var shortId 	=	require('shortid');
+var shortId 	=	require('shortid'),
+	User 		= 	require('../models/user'),
+	bcrypt      =   require('bcrypt-nodejs');
 
 module.exports = function(io){	
 	var clients = []; // who is in lobby scene
@@ -25,6 +27,41 @@ module.exports = function(io){
 
 
 		socket.on("SIGNUP", function (data){
+		 	
+			User.findOne ({username: data.username}, function(err, user) {
+				if(user){
+					console.log(data.username + " already exist");
+				}else if(!user){
+					var hash = bcrypt.hashSync(data.password);
+					var user = new User({ username:data.username ,password: hash });
+					user.save(function(err) {
+					    if(err) {
+					     	console.log(err);
+					    } else {
+					      	console.log('user: ' + user.username + " saved.");
+					    }
+					});
+				}else{
+					console.log(err);
+				}
+			});
+		    
+		});
+
+		socket.on("LOGIN", function (data){
+
+			// User.findOne ({username: data.username}, function(err, user) {
+			// 	if(user){
+			// 		if(bcrypt.compareSync(data.password, user.password)){
+			// 			console.log(user.username + "login success");
+			// 		}
+			// 	}else{
+			// 		console.log(err);
+			// 	}
+			    
+		 //  	})
+
+
 			console.log(data);
 			currentUser = {
 				id:shortId.generate(),
@@ -166,7 +203,7 @@ module.exports = function(io){
 
 		socket.on("disconnect", function (){
 			removeUserLobby();
-			removePlayerRoom();
+			// removePlayerRoom();
 		});
 
 		removeUserLobby = function(){
@@ -188,6 +225,7 @@ module.exports = function(io){
 			console.log("User " + currentUser.name + " as PlayerNumber " + currentUser.playerNumber + " is logout from roomNumber " + currentUser.roomNumber);
 			rooms[currentUser.roomNumber].players.splice(currentUser.playerNumber,1);
 		}
+
 
 	});
 
