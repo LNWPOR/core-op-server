@@ -78,7 +78,8 @@ module.exports = function(io){
 							highScore:user.highScore,
 							playerNumber:null,
 							roomNumber:null,
-							position:"0,0,0"
+							position:"0,0,0",
+							rotation:"0,0,0"
 						}
 						socket.emit("CONNECTED", currentUser );
 						listOfUsers();
@@ -162,6 +163,7 @@ module.exports = function(io){
 		socket.on("UPDATE_OTHER_PLAYER", function(data){
 			// socket.emit("UPDATE_OTHER_PLAYER");
 			currentUser.position = data.position;
+			currentUser.rotation = data.rotation;
 			socket.broadcast.emit("UPDATE_OTHER_PLAYER",currentUser);
 		});
 
