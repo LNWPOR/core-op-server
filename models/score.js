@@ -3,7 +3,9 @@ var mongoose = require('mongoose'),
     
 var Score = new Schema({
 		scores:Number,
-		playerID:[String]
+		player1Username:String,
+		player2Username:String
+
 });    
     
 module.exports = mongoose.model('scores', Score);

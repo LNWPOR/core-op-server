@@ -1,5 +1,6 @@
 var shortId 	=	require('shortid'),
 	User 		= 	require('../models/user'),
+	Score 		= 	require('../models/score'),
 	bcrypt      =   require('bcrypt-nodejs');
 
 module.exports = function(io){	
@@ -165,6 +166,42 @@ module.exports = function(io){
 			currentUser.position = data.position;
 			currentUser.rotation = data.rotation;
 			socket.broadcast.emit("UPDATE_OTHER_PLAYER",currentUser);
+		});
+
+		socket.on("GO_BACK_READY", function(data){
+			console.log(data);
+			var score = new Score({ 
+				scores:parseFloat(data.scores) ,
+				player1Username:data.player1,
+				player2Username:data.player2
+			});
+			score.save(function(err) {
+			    if(err) {
+			     	console.log(err);
+			     	var result = {
+						status:0
+					}
+					socket.emit("GO_BACK_READY", result );
+					socket.broadcast.emit("GO_BACK_READY",result);
+			    } else {
+			      	console.log("new score saved.");
+			      	var result = {
+						status:1
+					}
+					socket.emit("GO_BACK_READY", result );
+					socket.broadcast.emit("GO_BACK_READY",result);
+			    }
+			});
+
+			
+		});
+
+		socket.on("GET_ROOM", function(data){
+			// socket.emit("UPDATE_OTHER_PLAYER");
+			roomSent = {
+				rooms:rooms[parseInt(data.roomNumber)]
+			}
+			socket.emit("GET_ROOM",roomSent);
 		});
 
 	// 	socket.on("PLAY_REQUEST", function (){
