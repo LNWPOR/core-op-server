@@ -156,9 +156,13 @@ module.exports = function(io){
 			socket.emit("GET_CONNECTED_ROOM_USER", currentRoomsStatus );
 		});
 
-		socket.on("ROOM_READY", function(){
-			socket.emit("ROOM_READY");
-			socket.broadcast.emit("ROOM_READY");
+		socket.on("ROOM_READY", function(data){
+			console.log(data);
+			var result = {
+				roomNumber:parseInt(data.roomNumber)
+			}
+			socket.emit("ROOM_READY",result);
+			socket.broadcast.emit("ROOM_READY",result);
 		});
 
 		socket.on("UPDATE_OTHER_PLAYER", function(data){
@@ -169,6 +173,9 @@ module.exports = function(io){
 		});
 
 		socket.on("GO_BACK_READY", function(data){
+			rooms[parseFloat(data.roomNumber)] = {
+				players:[]
+			}
 			console.log(data);
 			var score = new Score({ 
 				scores:parseFloat(data.scores) ,
@@ -198,7 +205,7 @@ module.exports = function(io){
 
 		socket.on("GET_ROOM", function(data){
 			// socket.emit("UPDATE_OTHER_PLAYER");
-			roomSent = {
+			var roomSent = {
 				rooms:rooms[parseInt(data.roomNumber)]
 			}
 			socket.emit("GET_ROOM",roomSent);
@@ -260,7 +267,7 @@ module.exports = function(io){
 		});
 
 		removeUserLobby = function(){
-			socket.broadcast.emit('USER_DISCONNECTED',currentUser);
+			// socket.broadcast.emit('USER_DISCONNECTED',currentUser);
 			for (var i = 0; i < clients.length; i++) {
 				if (clients[i].name === currentUser.name && clients[i].id === currentUser.id) {
 
