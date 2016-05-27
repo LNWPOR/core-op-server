@@ -211,6 +211,20 @@ module.exports = function(io){
 			socket.emit("GET_ROOM",roomSent);
 		});
 
+		socket.on("SHOOT", function(data){
+			// socket.emit("UPDATE_OTHER_PLAYER");
+			// var roomSent = {
+			// 	rooms:rooms[parseInt(data.roomNumber)]
+			// }
+			// console.log(data);
+
+			var bullet = {
+				position:data.position
+			}
+			socket.emit("SHOOT",bullet);
+			socket.broadcast.emit("SHOOT",bullet);
+		});
+
 	// 	socket.on("PLAY_REQUEST", function (){
 
 	// 		var players = {
